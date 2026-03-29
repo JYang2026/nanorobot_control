@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  blueprint-api:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./outputs:/app/outputs
+      - ./logs:/app/logs
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # 可选：使用Celery处理后台任务
+  # blueprint-worker:
+  #   build: .
+  #   command: celery -A tasks worker --loglevel=info
+  #   volumes:
+  #     - ./uploads:/app/uploads
+  #     - ./outputs:/app/outputs
+  #   depends_on:
+  #     - redis
+  # 
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+
+networks:
+  default:
+    name: blueprint-network
