@@ -662,14 +662,17 @@ def process_blueprint(file_path: str, material: str = "aluminum") -> Dict:
     # 1. 识别图纸
     print(f"正在识别图纸: {file_path}")
     blueprint = system["recognizer"].recognize_from_pdf(file_path)
+    print(f"[process_blueprint] 识别完成，features数量: {len(blueprint.features)}")
     
     # 2. 生成加工路径
     print(f"识别到 {len(blueprint.features)} 个特征，生成加工路径...")
     plan = system["path_generator"].generate_plan(blueprint, material)
+    print(f"[process_blueprint] 生成 {len(plan.operations)} 个加工操作")
     
     # 3. 生成G代码和仿真数据
     print("生成G代码和仿真数据...")
     result = system["gcode_generator"].generate_with_simulation_data(plan)
+    print(f"[process_blueprint] 仿真数据toolpaths数量: {len(result['simulation']['toolpaths'])}")
     
     # 添加图纸信息
     result["blueprint"] = {
