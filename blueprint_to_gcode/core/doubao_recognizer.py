@@ -15,8 +15,15 @@ from datetime import datetime
 DOUBAO_API_URL = "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
 DOUBAO_MODEL = "doubao-vision-pro"
 
-# 环境变量获取API Key
-DOUBAO_API_KEY = os.environ.get("DOUBAO_API_KEY", "")
+# ============================================
+# 在这里直接填写你的豆包API Key（推荐方式）
+# 格式：DOUBAO_API_KEY = "你的Key"
+# ============================================
+DOUBAO_API_KEY = ""  # <-- 在这里填入你的API Key
+
+# 也可以从环境变量读取
+if not DOUBAO_API_KEY:
+    DOUBAO_API_KEY = os.environ.get("DOUBAO_API_KEY", "")
 
 
 class DoubaoBlueprintRecognizer:
