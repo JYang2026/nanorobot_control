@@ -165,10 +165,14 @@ class BlueprintRecognizer:
         from pathlib import Path
         
         # 方法1: 尝试豆包AI识别（如果配置了API Key）
-        doubao_key = os.environ.get("DOUBAO_API_KEY", "")
+        from core.doubao_recognizer import DoubaoBlueprintRecognizer, DOUBAO_API_KEY
+        doubao_key = os.environ.get("DOUBAO_API_KEY", "") or DOUBAO_API_KEY
+        
         if doubao_key:
             try:
                 print("[BlueprintRecognizer] 尝试使用豆包AI识别...")
+                print(f"[BlueprintRecognizer] API Key: {doubao_key[:10]}...")  # 只显示前10位
+                
                 # 先转换PDF为图片
                 import subprocess
                 pdf_dir = Path(pdf_path).parent
@@ -179,11 +183,14 @@ class BlueprintRecognizer:
                 ], capture_output=True, timeout=60)
                 
                 # 调用豆包识别
-                from core.doubao_recognizer import DoubaoBlueprintRecognizer
                 recognizer = DoubaoBlueprintRecognizer(api_key=doubao_key)
                 ai_result = recognizer.recognize_from_pdf_images(str(pdf_dir))
                 
+                # 打印豆包原始返回结果
+                print(f"[BlueprintRecognizer] 豆包API返回: {ai_result}")
+                
                 if ai_result and ai_result.get('features'):
+                    print(f"[BlueprintRecognizer] 识别到 {len(ai_result.get('features', []))} 个特征")
                     # 转换为BlueprintInfo
                     info = BlueprintInfo(
                         part_number=ai_result.get('part_number', ''),
@@ -212,9 +219,13 @@ class BlueprintRecognizer:
                     
                     print(f"[BlueprintRecognizer] 豆包AI成功识别 {len(info.features)} 个特征")
                     return info
+                else:
+                    print("[BlueprintRecognizer] 豆包返回数据中没有features字段，回退到默认数据")
                     
             except Exception as e:
                 print(f"[BlueprintRecognizer] 豆包识别失败: {e}，尝试其他方法")
+        else:
+            print("[BlueprintRecognizer] 未配置豆包API Key，将使用默认数据")
         
         # 方法2: 尝试传统PDF识别
         try:
